@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>郵金專業翻譯助手</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f4f7f6; }
+        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; background: #e9ecef; border-left: 5px solid #007bff; min-height: 50px; }
+        .feedback-area { margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>郵局/金融專業翻譯</h2>
+        <textarea id="inputText" placeholder="請輸入中文句子..."></textarea>
+        <button onclick="translateText()">即時翻譯</button>
+        
+        <div id="result">翻譯結果會顯示在這裡...</div>
+
+        <div class="feedback-area">
+            <h4>同事修正回饋</h4>
+            <input type="text" id="suggestText" placeholder="建議的正確翻譯" style="width:70%">
+            <button onclick="sendFeedback()" style="background:#28a745">提交建議</button>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwDJsIqHQvI-xJaHLLEAQKyWLezB5IJZNQJo32rfqhWhHVQQLef6UAABa7KwHCg802x/exec"; // 貼上剛才複製的 URL
+
+        async function translateText() {
+            const text = document.getElementById('inputText').value;
+            const res = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "translate", text: text, targetLang: "en" })
+            });
+            const data = await res.json();
+            document.getElementById('result').innerText = data.result;
+        }
+
+        async function sendFeedback() {
+            const source = document.getElementById('inputText').value;
+            const suggestion = document.getElementById('suggestText').value;
+            await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion })
+            });
+            alert("感謝回饋！管理員會進行審核並更新術語庫。");
+        }
+    </script>
+</body>
+</html>
