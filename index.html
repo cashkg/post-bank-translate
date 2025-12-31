@@ -3,32 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>郵金專業翻譯助手 v2.0</title>
+    <title>郵金專業翻譯助手 v2.1</title>
     <style>
-        :root { --primary-color: #007d32; --secondary-color: #005a24; --bg-color: #f4f7f6; }
+        :root { --primary-color: #007d32; --secondary-color: #005a24; --bg-color: #f4f7f6; --fb-color: #1877F2; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary-color); text-align: center; margin-bottom: 20px; font-size: 24px; letter-spacing: 1px; }
-        .status-bar { font-size: 12px; text-align: center; color: #888; margin-bottom: 15px; }
+        h2 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-size: 24px; letter-spacing: 1px; }
+        .status-bar { font-size: 12px; text-align: center; color: #888; margin-bottom: 20px; }
+        
         label { font-weight: bold; display: block; margin-bottom: 8px; color: #444; font-size: 14px; }
         textarea { width: 100%; height: 110px; padding: 12px; border: 2px solid #eee; border-radius: 10px; resize: none; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        textarea:focus { border-color: var(--primary-color); outline: none; background: #fff; }
+        textarea:focus { border-color: var(--primary-color); outline: none; }
         
         .button-group { margin: 15px 0; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; position: relative; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-translate { background-color: var(--primary-color); color: white; box-shadow: 0 4px 0 var(--secondary-color); }
         .btn-translate:active { transform: translateY(3px); box-shadow: none; }
-        .btn-translate:disabled { background-color: #ccc; box-shadow: none; cursor: not-allowed; }
+        .btn-translate:disabled { background-color: #ccc; box-shadow: none; }
 
-        #resultArea { background: #fdfdfd; border: 1px solid #eee; border-left: 6px solid var(--primary-color); padding: 15px; min-height: 60px; margin-top: 10px; border-radius: 8px; font-size: 18px; color: #333; line-height: 1.5; transition: opacity 0.5s; }
+        #resultArea { background: #fdfdfd; border: 1px solid #eee; border-left: 6px solid var(--primary-color); padding: 15px; min-height: 60px; margin-top: 10px; border-radius: 8px; font-size: 18px; color: #333; line-height: 1.5; }
         
         .loading-spinner { display: none; margin: 10px auto; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .feedback-section { margin-top: 30px; padding: 15px; background: #fafafa; border-radius: 10px; font-size: 13px; }
+        /* 回饋與聯繫區 */
+        .feedback-section { margin-top: 30px; padding: 15px; background: #fafafa; border-radius: 10px; border: 1px solid #eee; }
         .input-feedback { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; box-sizing: border-box; }
         .btn-feedback { background-color: #f0f0f0; color: #666; border: 1px solid #ddd; padding: 8px; font-size: 12px; }
-        .btn-feedback:hover { background-color: #e9e9e9; }
+        
+        .contact-footer { margin-top: 25px; text-align: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .fb-link { color: var(--fb-color); text-decoration: none; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
+        .fb-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -53,13 +58,19 @@
         <input type="text" id="suggestText" class="input-feedback" placeholder="請輸入您建議的正確譯文">
         <button class="btn-feedback" onclick="submitFeedback()">提交修正給管理員</button>
     </div>
+
+    <div class="contact-footer">
+        <p style="font-size: 12px; color: #999; margin-bottom: 8px;">如有系統問題或大宗翻譯需求</p>
+        <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank" class="fb-link">
+            🔵 聯繫開發者 (Facebook 粉絲專頁)
+        </a>
+    </div>
 </div>
 
 <script>
-    // 請確認此處為您的 GAS URL
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzDDgIEGm9cHVQD-x2wt09gVp5fWjW1ABRvOYtqp8celP-hGhxfvVp_4WqO7dabGy7h/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwDJsIqHQvI-xJaHLLEAQKyWLezB5IJZNQJo32rfqhWhHVQQLef6UAABa7KwHCg802x/exec";
 
-    // 前端本地預處理術語 (最常用的放在這裡，速度變秒開)
+    // 本地預處理術語 (可視需求自行增加)
     const localGlossary = {
         "定存": "Fixed Deposit",
         "掛號": "Registered Mail",
@@ -76,13 +87,12 @@
         let text = inputField.value.trim();
         if (!text) return alert("請輸入文字");
 
-        // 啟動動畫與鎖定按鈕
         btn.disabled = true;
         loader.style.display = "block";
         resultDiv.style.opacity = "0.5";
-        resultDiv.innerText = "專業術語調配中...";
+        resultDiv.innerText = "正在調配專業術語...";
 
-        // 前端先行替換常用詞 (體感加速)
+        // 本地快取替換
         for (const [key, value] of Object.entries(localGlossary)) {
             text = text.replace(new RegExp(key, 'g'), value);
         }
@@ -90,26 +100,13 @@
         try {
             const response = await fetch(GAS_URL, {
                 method: "POST",
-                mode: 'no-cors', // 處理可能的 CORS 問題
-                headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({ action: "translate", text: text })
             });
-
-            // 因為 GAS no-cors 無法直接讀取 body，我們維持原來的標準 fetch 流程
-            // 如果連線失敗，請嘗試將 mode 移除
-            const normalResponse = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "translate", text: text })
-            });
-            
-            const data = await normalResponse.json();
-            
-            // 顯示結果
+            const data = await response.json();
             resultDiv.innerText = data.result;
             resultDiv.style.opacity = "1";
         } catch (e) {
-            console.error(e);
-            resultDiv.innerText = "連線逾時，但您可以再試一次。";
+            resultDiv.innerText = "連線逾時，請再試一次。";
         } finally {
             btn.disabled = false;
             loader.style.display = "none";
@@ -119,17 +116,17 @@
     async function submitFeedback() {
         const source = document.getElementById('inputText').value;
         const suggestion = document.getElementById('suggestText').value;
-        if (!source || !suggestion) return alert("請填寫原句與建議內容");
+        if (!source || !suggestion) return alert("請填寫內容");
 
         try {
             await fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion })
             });
-            alert("感謝！您的建議已存入後端試算表。");
+            alert("感謝回饋！管理員會盡快更新術語庫。\n若有急事歡迎至 Facebook 粉絲專頁聯繫。");
             document.getElementById('suggestText').value = "";
         } catch (e) {
-            alert("提交失敗，請檢查網路。");
+            alert("提交失敗。");
         }
     }
 </script>
