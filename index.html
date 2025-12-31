@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>郵金專業翻譯助手 v2.1</title>
+    <title>郵金專業翻譯助手 v2.2</title>
     <style>
-        :root { --primary-color: #007d32; --secondary-color: #005a24; --bg-color: #f4f7f6; --fb-color: #1877F2; }
+        :root { --primary-color: #007d32; --secondary-color: #005a24; --bg-color: #f4f7f6; --fb-color: #1877F2; --error-color: #dc3545; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         h2 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-size: 24px; letter-spacing: 1px; }
-        .status-bar { font-size: 12px; text-align: center; color: #888; margin-bottom: 20px; }
         
+        /* 狀態列設計 */
+        .status-bar { font-size: 12px; text-align: center; color: #666; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: #ccc; }
+        .dot-online { background-color: #28a745; box-shadow: 0 0 5px #28a745; }
+        .dot-offline { background-color: var(--error-color); box-shadow: 0 0 5px var(--error-color); }
+        .dot-checking { background-color: #ffc107; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+
         label { font-weight: bold; display: block; margin-bottom: 8px; color: #444; font-size: 14px; }
         textarea { width: 100%; height: 110px; padding: 12px; border: 2px solid #eee; border-radius: 10px; resize: none; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
         textarea:focus { border-color: var(--primary-color); outline: none; }
@@ -26,24 +33,25 @@
         .loading-spinner { display: none; margin: 10px auto; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 回饋與聯繫區 */
         .feedback-section { margin-top: 30px; padding: 15px; background: #fafafa; border-radius: 10px; border: 1px solid #eee; }
         .input-feedback { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; box-sizing: border-box; }
         .btn-feedback { background-color: #f0f0f0; color: #666; border: 1px solid #ddd; padding: 8px; font-size: 12px; }
         
         .contact-footer { margin-top: 25px; text-align: center; border-top: 1px solid #eee; padding-top: 15px; }
         .fb-link { color: var(--fb-color); text-decoration: none; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
-        .fb-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>郵金專業翻譯</h2>
-    <div class="status-bar">● 已連接專業術語庫 (含自動快取)</div>
+    <div class="status-bar">
+        <span id="statusDot" class="status-dot dot-checking"></span>
+        <span id="statusText">詞庫連線檢查中...</span>
+    </div>
     
-    <label>請輸入中文句子：</label>
-    <textarea id="inputText" placeholder="例如：我想辦理定存並寄一封掛號信..."></textarea>
+    <label>請輸入中文內容：</label>
+    <textarea id="inputText" placeholder="例如：我想辦理定存..."></textarea>
     
     <div class="button-group">
         <button id="transBtn" class="btn-translate" onclick="doTranslate()">立即翻譯</button>
@@ -51,18 +59,18 @@
     </div>
     
     <label>翻譯結果：</label>
-    <div id="resultArea">等待輸入內容...</div>
+    <div id="resultArea">等待輸入...</div>
 
     <div class="feedback-section">
-        <label>💡 翻譯有誤？提供正確建議：</label>
-        <input type="text" id="suggestText" class="input-feedback" placeholder="請輸入您建議的正確譯文">
-        <button class="btn-feedback" onclick="submitFeedback()">提交修正給管理員</button>
+        <label>💡 翻譯修正建議：</label>
+        <input type="text" id="suggestText" class="input-feedback" placeholder="輸入正確的專業譯文">
+        <button class="btn-feedback" onclick="submitFeedback()">提交給管理員</button>
     </div>
 
     <div class="contact-footer">
-        <p style="font-size: 12px; color: #999; margin-bottom: 8px;">如有系統問題或大宗翻譯需求</p>
+        <p style="font-size: 11px; color: #999;">系統開發與技術支援</p>
         <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank" class="fb-link">
-            🔵 聯繫開發者 (Facebook 粉絲專頁)
+            🔵 聯繫開發者 (FB 粉絲專頁)
         </a>
     </div>
 </div>
@@ -70,12 +78,27 @@
 <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwDJsIqHQvI-xJaHLLEAQKyWLezB5IJZNQJo32rfqhWhHVQQLef6UAABa7KwHCg802x/exec";
 
-    // 本地預處理術語 (可視需求自行增加)
-    const localGlossary = {
-        "定存": "Fixed Deposit",
-        "掛號": "Registered Mail",
-        "存摺": "Bankbook",
-        "匯款": "Remittance"
+    // 1. 初始化檢查連線狀態
+    window.onload = async function() {
+        const dot = document.getElementById('statusDot');
+        const txt = document.getElementById('statusText');
+        try {
+            // 發送一個空的 translate 請求來測試 GAS
+            const response = await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "translate", text: "ping" })
+            });
+            if (response.ok) {
+                dot.className = "status-dot dot-online";
+                txt.innerText = "自定義詞庫：連線正常";
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            dot.className = "status-dot dot-offline";
+            txt.innerText = "自定義詞庫：連線異常";
+            txt.style.color = "#dc3545";
+        }
     };
 
     async function doTranslate() {
@@ -85,17 +108,11 @@
         const loader = document.getElementById('loader');
         
         let text = inputField.value.trim();
-        if (!text) return alert("請輸入文字");
+        if (!text) return;
 
         btn.disabled = true;
         loader.style.display = "block";
         resultDiv.style.opacity = "0.5";
-        resultDiv.innerText = "正在調配專業術語...";
-
-        // 本地快取替換
-        for (const [key, value] of Object.entries(localGlossary)) {
-            text = text.replace(new RegExp(key, 'g'), value);
-        }
 
         try {
             const response = await fetch(GAS_URL, {
@@ -106,7 +123,7 @@
             resultDiv.innerText = data.result;
             resultDiv.style.opacity = "1";
         } catch (e) {
-            resultDiv.innerText = "連線逾時，請再試一次。";
+            resultDiv.innerText = "連線失敗，請確認網路狀態。";
         } finally {
             btn.disabled = false;
             loader.style.display = "none";
@@ -123,7 +140,7 @@
                 method: "POST",
                 body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion })
             });
-            alert("感謝回饋！管理員會盡快更新術語庫。\n若有急事歡迎至 Facebook 粉絲專頁聯繫。");
+            alert("提交成功！管理員會盡快更新。");
             document.getElementById('suggestText').value = "";
         } catch (e) {
             alert("提交失敗。");
