@@ -5,85 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>郵金翻譯 v3.0 測試版</title>
     <style>
-        :root { --primary-color: #007d32; --bg-color: #f8f9fa; }
-        body { font-family: sans-serif; background: var(--bg-color); padding: 15px; display: flex; justify-content: center; }
-        .container { background: white; width: 100%; max-width: 500px; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .lang-select { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; }
-        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .voice-btn { background: #e9ecef; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-size: 13px; }
-        .btn-translate { width: 100%; padding: 14px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-        #resultArea { background: #fff; border: 1px solid #eee; border-left: 5px solid var(--primary-color); padding: 15px; margin-top: 15px; border-radius: 5px; position: relative; }
-        .speak-icon { cursor: pointer; float: right; font-size: 20px; }
+        :root { --primary: #007d32; --accent: #1877F2; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 15px; shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        select, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        .btn-mic { background: #dc3545; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .btn-translate { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #status { font-size: 12px; text-align: center; margin-bottom: 10px; }
+        #result { background: #f8f9fa; padding: 15px; border-left: 5px solid var(--primary); margin-top: 15px; min-height: 50px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="color:var(--primary-color); text-align:center;">郵金助手 v3.0 TEST</h2>
+<div class="card">
+    <h2>郵金翻譯 v3.0 (語音測試)</h2>
     
-    <label>1. 選擇目標語言：</label>
-    <select id="langPicker" class="lang-select">
-        <option value="en">英文 (English)</option>
-        <option value="id">印尼文 (Bahasa Indonesia)</option>
-        <option value="vi">越南文 (Tiếng Việt)</option>
+    <div id="status">● 系統準備就緒</div>
+
+    <label>1. 選擇客戶說的語言：</label>
+    <select id="langSelect">
+        <option value="en-US">英文 (English)</option>
+        <option value="vi-VN">越南文 (Tiếng Việt)</option>
+        <option value="id-ID">印尼文 (Bahasa Indonesia)</option>
+        <option value="th-TH">泰文 (ไทย)</option>
     </select>
 
-    <label>2. 輸入中文 (支援語音輸入)：</label>
-    <textarea id="inputText" placeholder="請輸入或點擊下方語音按鈕..."></textarea>
-    <button class="voice-btn" onclick="startDictation()">🎤 語音輸入</button>
+    <button id="micBtn" class="btn-mic" onclick="startSpeech()">🎤 點擊開始錄音 (辨識客戶母語)</button>
+    
+    <textarea id="inputText" placeholder="語音辨識結果將顯示在此，或手動輸入..."></textarea>
+    
+    <button class="btn-translate" onclick="doTranslate()">翻譯成中文 (套用詞庫)</button>
 
-    <button class="btn-translate" onclick="doTranslate()">執行專業翻譯</button>
-
-    <div id="resultArea">
-        <span id="speakBtn" class="speak-icon" onclick="speakResult()" style="display:none;">🔊</span>
-        <div id="translatedText">翻譯結果將顯示於此...</div>
-    </div>
+    <div id="result">翻譯結果...</div>
 </div>
 
 <script>
-    const GAS_URL = "您的_GAS_URL";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwrJwV3vhEaYeB5t9sGaRia5Z9kRWknOJnj7d9mZN-bwjSf2AoofyzCS2tsgIIVBQZv/exec";
 
-    // 語音輸入 (Speech to Text)
-    function startDictation() {
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'zh-TW';
+    // 語音辨識設定
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    function startSpeech() {
+        const lang = document.getElementById('langSelect').value;
+        recognition.lang = lang;
         recognition.start();
-        recognition.onresult = (event) => {
-            document.getElementById('inputText').value = event.results[0][0].transcript;
-        };
+        document.getElementById('status').innerText = "● 正在聆聽 " + lang + "...";
+        document.getElementById('micBtn').style.background = "#ffc107";
     }
 
-    // 執行翻譯
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('inputText').value = transcript;
+        document.getElementById('status').innerText = "● 辨識成功";
+        document.getElementById('micBtn').style.background = "#dc3545";
+    };
+
     async function doTranslate() {
         const text = document.getElementById('inputText').value;
-        const lang = document.getElementById('langPicker').value;
-        const resultDiv = document.getElementById('translatedText');
-        
-        if (!text) return;
-        resultDiv.innerText = "正在進行多國語調配...";
+        const resultDiv = document.getElementById('result');
+        if(!text) return;
+
+        resultDiv.innerText = "正在進行多國語言轉換...";
 
         try {
             const response = await fetch(GAS_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "translate", text: text, targetLang: lang })
+                body: JSON.stringify({ action: "translate", text: text, target: "zh-TW" })
             });
             const data = await response.json();
             resultDiv.innerText = data.result;
-            document.getElementById('speakBtn').style.display = "block";
         } catch (e) {
-            resultDiv.innerText = "連線失敗";
+            resultDiv.innerText = "翻譯失敗，請檢查 API 設定。";
         }
     }
-
-    // 語音朗讀 (Text to Speech)
-    function speakResult() {
-        const text = document.getElementById('translatedText').innerText;
-        const lang = document.getElementById('langPicker').value;
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = lang; // 自動根據選擇的語言發音
-        window.speechSynthesis.speak(msg);
-    }
 </script>
-
 </body>
 </html>
