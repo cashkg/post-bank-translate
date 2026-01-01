@@ -3,93 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>郵金翻譯助手</title>
+    <title>郵金助手</title>
     <style>
-        :root { --main-color: #2e7d32; --sub-color: #1b5e20; --fb: #1877F2; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: #fdfdfd; margin: 0; padding: 15px; display: flex; justify-content: center; color: #333; }
-        .container { background: white; width: 100%; max-width: 480px; padding: 20px; border-radius: 12px; border: 1px solid #eee; }
-        
-        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        :root { --main: #2e7d32; --fb: #1877F2; }
+        body { font-family: sans-serif; background: #fdfdfd; padding: 15px; display: flex; justify-content: center; }
+        .container { background: white; width: 100%; max-width: 480px; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .stats { font-size: 11px; color: #999; }
-        
-        h2 { color: var(--main-color); margin: 0; font-size: 20px; }
-        .status-bar { font-size: 11px; margin: 5px 0 15px 0; display: flex; align-items: center; gap: 5px; color: #888; }
-        .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
-        .online { background: #4caf50; }
-
-        label { font-size: 13px; font-weight: bold; color: #666; }
-        select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        
-        .mic-btn { background: #ef5350; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
+        select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn-main { background: var(--main); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        #resultArea { background: #f9f9f9; border-left: 4px solid var(--main); padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 18px; min-height: 60px; }
+        .mic-btn { background: #ef5350; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .recording { background: #ffa726; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.7; } }
-
-        .btn-main { background: var(--main-color); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; cursor: pointer; }
-        
-        #resultArea { background: #f9f9f9; border-left: 4px solid var(--main-color); padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 17px; min-height: 50px; }
-        
-        .feedback-box { margin-top: 25px; padding: 12px; background: #fff; border: 1px dashed #ccc; border-radius: 8px; font-size: 12px; }
-        .footer { margin-top: 20px; text-align: center; border-top: 1px solid #f0f0f0; padding-top: 10px; }
-        .fb-link { font-size: 12px; color: var(--fb); text-decoration: none; }
+        .footer { margin-top: 25px; text-align: center; border-top: 1px solid #eee; padding-top: 15px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="nav-header">
-        <h2 id="ui-title">郵金翻譯助手</h2>
-        <div class="stats">
-            收錄: <span id="vocabCnt">...</span> 筆 | 使用: <span id="usageCnt">...</span> 次
-        </div>
-    </div>
-
-    <div class="status-bar">
-        <span id="statusDot" class="dot"></span> <span id="statusTxt">系統檢查中...</span>
+        <h2 style="color:var(--main); margin:0; font-size:20px;">郵金助手</h2>
+        <div class="stats">收錄: <span id="vocabCnt">0</span> | 使用: <span id="usageCnt">0</span></div>
     </div>
     
-    <label>1. 選擇語言環境：</label>
+    <label style="font-size:12px; color:#666;">來源語言：</label>
     <select id="srcLang">
-        <option value="zh-TW">中文 (繁體)</option>
+        <option value="zh-TW">中文</option>
         <option value="en-US">英文 (English)</option>
         <option value="ja-JP">日文 (日本語)</option>
         <option value="vi-VN">越南文 (Tiếng Việt)</option>
         <option value="id-ID">印尼文 (Bahasa Indonesia)</option>
+        <option value="th-TH">泰文 (ไทย)</option>
     </select>
 
-    <label>2. 目標翻譯語言：</label>
+    <label style="font-size:12px; color:#666;">翻譯目標：</label>
     <select id="tarLang">
         <option value="zh-TW">翻譯為 中文</option>
-        <option value="en-US">英文 (English)</option>
-        <option value="ja-JP">日文 (日本語)</option>
-        <option value="vi-VN">越南文 (Tiếng Việt)</option>
-        <option value="id-ID">印尼文 (Bahasa Indonesia)</option>
+        <option value="en">英文 (English)</option>
+        <option value="ja">日文 (日本語)</option>
+        <option value="vi">越南文 (Tiếng Việt)</option>
+        <option value="id">印尼文 (Bahasa Indonesia)</option>
+        <option value="th">泰文 (ไทย)</option>
     </select>
 
-    <button id="micBtn" class="mic-btn" onclick="toggleMic()">🎤 點擊錄音 (可手動修正文字)</button>
-
-    <textarea id="inputText" rows="3" placeholder="語音辨識內容將出現在此..."></textarea>
-    
+    <button id="micBtn" class="mic-btn" onclick="toggleMic()">🎤 點擊錄音 (可修正文字)</button>
+    <textarea id="inputText" rows="3" placeholder="請輸入或語音辨識內容..."></textarea>
     <button class="btn-main" onclick="doTranslate()">執行翻譯</button>
 
     <div id="resultArea">翻譯結果顯示區</div>
 
-    <div class="feedback-box">
-        <label>💡 內容建議：</label>
-        <input type="text" id="suggestText" style="width:100%; padding:6px; margin:5px 0; border:1px solid #ddd;" placeholder="請輸入建議的譯文">
-        <button onclick="submitFeedback()" style="cursor:pointer; font-size:11px;">提交給管理員</button>
-    </div>
-
     <div class="footer">
-        <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank" class="fb-link">
+        <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank" style="color:var(--fb); text-decoration:none; font-weight:bold;">
             聯繫「小優化助手」粉絲專頁
         </a>
     </div>
 </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwBLniSytFXbSl6Y6vyjV7hnUENTe7oQmXEIYRnRLdLxkJOJjjnIlI-54y9gKpQYq8R/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwe3qJ0fiI9XFfN-5cNtKD0rDSI8i9m7WFYhbaFs49y7JF1nkKnitIJC7idVI8I6EmB/exec";
     
-    // 語音辨識
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
     if (SpeechRecognition) {
@@ -98,11 +71,10 @@
             document.getElementById('inputText').value = e.results[0][0].transcript;
             document.getElementById('micBtn').classList.remove('recording');
         };
-        recognition.onend = () => document.getElementById('micBtn').classList.remove('recording');
     }
 
     function toggleMic() {
-        if (!recognition) return alert("瀏覽器不支援語音");
+        if (!recognition) return alert("不支援語音");
         recognition.lang = document.getElementById('srcLang').value;
         recognition.start();
         document.getElementById('micBtn').classList.add('recording');
@@ -112,16 +84,19 @@
         const text = document.getElementById('inputText').value;
         const target = document.getElementById('tarLang').value;
         if (!text) return;
-        document.getElementById('resultArea').innerText = "處理中...";
+        document.getElementById('resultArea').innerText = "連線中...";
         try {
             const res = await fetch(GAS_URL, {
                 method: "POST",
+                mode: "cors",
                 body: JSON.stringify({ action: "translate", text: text, target: target })
             });
             const data = await res.json();
             document.getElementById('resultArea').innerText = data.result;
-            loadStats(); // 翻譯完更新一次數據
-        } catch (e) { document.getElementById('resultArea').innerText = "連線逾時"; }
+            loadStats();
+        } catch (e) { 
+            document.getElementById('resultArea').innerText = "連線異常，請確認 API 已發布為「所有人」。"; 
+        }
     }
 
     async function loadStats() {
@@ -130,20 +105,7 @@
             const data = await res.json();
             document.getElementById('vocabCnt').innerText = data.vocab;
             document.getElementById('usageCnt').innerText = data.usage;
-            document.getElementById('statusDot').classList.add('online');
-            document.getElementById('statusTxt').innerText = "雲端詞庫已連線";
         } catch (e) {}
-    }
-
-    async function submitFeedback() {
-        const source = document.getElementById('inputText').value;
-        const suggestion = document.getElementById('suggestText').value;
-        if (!source || !suggestion) return alert("請填寫內容");
-        try {
-            await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion }) });
-            alert("已收到您的建議，謝謝！");
-            document.getElementById('suggestText').value = "";
-        } catch (e) { alert("提交異常"); }
     }
 
     window.onload = loadStats;
