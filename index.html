@@ -3,150 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>郵金專業翻譯助手 v2.2</title>
+    <title>郵金翻譯助手</title>
     <style>
-        :root { --primary-color: #007d32; --secondary-color: #005a24; --bg-color: #f4f7f6; --fb-color: #1877F2; --error-color: #dc3545; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .container { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-size: 24px; letter-spacing: 1px; }
+        :root { --main-color: #2e7d32; --sub-color: #1b5e20; --fb: #1877F2; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #fdfdfd; margin: 0; padding: 15px; display: flex; justify-content: center; color: #333; }
+        .container { background: white; width: 100%; max-width: 480px; padding: 20px; border-radius: 12px; border: 1px solid #eee; }
         
-        /* 狀態列設計 */
-        .status-bar { font-size: 12px; text-align: center; color: #666; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: #ccc; }
-        .dot-online { background-color: #28a745; box-shadow: 0 0 5px #28a745; }
-        .dot-offline { background-color: var(--error-color); box-shadow: 0 0 5px var(--error-color); }
-        .dot-checking { background-color: #ffc107; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .stats { font-size: 11px; color: #999; }
+        
+        h2 { color: var(--main-color); margin: 0; font-size: 20px; }
+        .status-bar { font-size: 11px; margin: 5px 0 15px 0; display: flex; align-items: center; gap: 5px; color: #888; }
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+        .online { background: #4caf50; }
 
-        label { font-weight: bold; display: block; margin-bottom: 8px; color: #444; font-size: 14px; }
-        textarea { width: 100%; height: 110px; padding: 12px; border: 2px solid #eee; border-radius: 10px; resize: none; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        textarea:focus { border-color: var(--primary-color); outline: none; }
+        label { font-size: 13px; font-weight: bold; color: #666; }
+        select, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
         
-        .button-group { margin: 15px 0; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-translate { background-color: var(--primary-color); color: white; box-shadow: 0 4px 0 var(--secondary-color); }
-        .btn-translate:active { transform: translateY(3px); box-shadow: none; }
-        .btn-translate:disabled { background-color: #ccc; box-shadow: none; }
+        .mic-btn { background: #ef5350; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
+        .recording { background: #ffa726; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.7; } }
 
-        #resultArea { background: #fdfdfd; border: 1px solid #eee; border-left: 6px solid var(--primary-color); padding: 15px; min-height: 60px; margin-top: 10px; border-radius: 8px; font-size: 18px; color: #333; line-height: 1.5; }
+        .btn-main { background: var(--main-color); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; cursor: pointer; }
         
-        .loading-spinner { display: none; margin: 10px auto; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .feedback-section { margin-top: 30px; padding: 15px; background: #fafafa; border-radius: 10px; border: 1px solid #eee; }
-        .input-feedback { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; box-sizing: border-box; }
-        .btn-feedback { background-color: #f0f0f0; color: #666; border: 1px solid #ddd; padding: 8px; font-size: 12px; }
+        #resultArea { background: #f9f9f9; border-left: 4px solid var(--main-color); padding: 15px; margin-top: 15px; border-radius: 4px; font-size: 17px; min-height: 50px; }
         
-        .contact-footer { margin-top: 25px; text-align: center; border-top: 1px solid #eee; padding-top: 15px; }
-        .fb-link { color: var(--fb-color); text-decoration: none; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 5px; }
+        .feedback-box { margin-top: 25px; padding: 12px; background: #fff; border: 1px dashed #ccc; border-radius: 8px; font-size: 12px; }
+        .footer { margin-top: 20px; text-align: center; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+        .fb-link { font-size: 12px; color: var(--fb); text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>郵金專業翻譯</h2>
+    <div class="nav-header">
+        <h2 id="ui-title">郵金翻譯助手</h2>
+        <div class="stats">
+            收錄: <span id="vocabCnt">...</span> 筆 | 使用: <span id="usageCnt">...</span> 次
+        </div>
+    </div>
+
     <div class="status-bar">
-        <span id="statusDot" class="status-dot dot-checking"></span>
-        <span id="statusText">詞庫連線檢查中...</span>
+        <span id="statusDot" class="dot"></span> <span id="statusTxt">系統檢查中...</span>
     </div>
     
-    <label>請輸入中文內容：</label>
-    <textarea id="inputText" placeholder="例如：我想辦理定存..."></textarea>
-    
-    <div class="button-group">
-        <button id="transBtn" class="btn-translate" onclick="doTranslate()">立即翻譯</button>
-        <div id="loader" class="loading-spinner"></div>
-    </div>
-    
-    <label>翻譯結果：</label>
-    <div id="resultArea">等待輸入...</div>
+    <label>1. 選擇語言環境：</label>
+    <select id="srcLang">
+        <option value="zh-TW">中文 (繁體)</option>
+        <option value="en-US">英文 (English)</option>
+        <option value="ja-JP">日文 (日本語)</option>
+        <option value="vi-VN">越南文 (Tiếng Việt)</option>
+        <option value="id-ID">印尼文 (Bahasa Indonesia)</option>
+    </select>
 
-    <div class="feedback-section">
-        <label>💡 翻譯修正建議：</label>
-        <input type="text" id="suggestText" class="input-feedback" placeholder="輸入正確的專業譯文">
-        <button class="btn-feedback" onclick="submitFeedback()">提交給管理員</button>
+    <label>2. 目標翻譯語言：</label>
+    <select id="tarLang">
+        <option value="zh-TW">翻譯為 中文</option>
+        <option value="en-US">英文 (English)</option>
+        <option value="ja-JP">日文 (日本語)</option>
+        <option value="vi-VN">越南文 (Tiếng Việt)</option>
+        <option value="id-ID">印尼文 (Bahasa Indonesia)</option>
+    </select>
+
+    <button id="micBtn" class="mic-btn" onclick="toggleMic()">🎤 點擊錄音 (可手動修正文字)</button>
+
+    <textarea id="inputText" rows="3" placeholder="語音辨識內容將出現在此..."></textarea>
+    
+    <button class="btn-main" onclick="doTranslate()">執行翻譯</button>
+
+    <div id="resultArea">翻譯結果顯示區</div>
+
+    <div class="feedback-box">
+        <label>💡 內容建議：</label>
+        <input type="text" id="suggestText" style="width:100%; padding:6px; margin:5px 0; border:1px solid #ddd;" placeholder="請輸入建議的譯文">
+        <button onclick="submitFeedback()" style="cursor:pointer; font-size:11px;">提交給管理員</button>
     </div>
 
-    <div class="contact-footer">
-        <p style="font-size: 11px; color: #999;">系統開發與技術支援</p>
+    <div class="footer">
         <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank" class="fb-link">
-            🔵 聯繫開發者 (FB 粉絲專頁)
+            聯繫「小優化助手」粉絲專頁
         </a>
     </div>
 </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwrJwV3vhEaYeB5t9sGaRia5Z9kRWknOJnj7d9mZN-bwjSf2AoofyzCS2tsgIIVBQZv/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwBLniSytFXbSl6Y6vyjV7hnUENTe7oQmXEIYRnRLdLxkJOJjjnIlI-54y9gKpQYq8R/exec";
+    
+    // 語音辨識
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.onresult = (e) => {
+            document.getElementById('inputText').value = e.results[0][0].transcript;
+            document.getElementById('micBtn').classList.remove('recording');
+        };
+        recognition.onend = () => document.getElementById('micBtn').classList.remove('recording');
+    }
 
-    // 1. 初始化檢查連線狀態
-    window.onload = async function() {
-        const dot = document.getElementById('statusDot');
-        const txt = document.getElementById('statusText');
-        try {
-            // 發送一個空的 translate 請求來測試 GAS
-            const response = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "translate", text: "ping" })
-            });
-            if (response.ok) {
-                dot.className = "status-dot dot-online";
-                txt.innerText = "自定義詞庫：連線正常";
-            } else {
-                throw new Error();
-            }
-        } catch (e) {
-            dot.className = "status-dot dot-offline";
-            txt.innerText = "自定義詞庫：連線異常";
-            txt.style.color = "#dc3545";
-        }
-    };
+    function toggleMic() {
+        if (!recognition) return alert("瀏覽器不支援語音");
+        recognition.lang = document.getElementById('srcLang').value;
+        recognition.start();
+        document.getElementById('micBtn').classList.add('recording');
+    }
 
     async function doTranslate() {
-        const inputField = document.getElementById('inputText');
-        const resultDiv = document.getElementById('resultArea');
-        const btn = document.getElementById('transBtn');
-        const loader = document.getElementById('loader');
-        
-        let text = inputField.value.trim();
+        const text = document.getElementById('inputText').value;
+        const target = document.getElementById('tarLang').value;
         if (!text) return;
-
-        btn.disabled = true;
-        loader.style.display = "block";
-        resultDiv.style.opacity = "0.5";
-
+        document.getElementById('resultArea').innerText = "處理中...";
         try {
-            const response = await fetch(GAS_URL, {
+            const res = await fetch(GAS_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "translate", text: text })
+                body: JSON.stringify({ action: "translate", text: text, target: target })
             });
-            const data = await response.json();
-            resultDiv.innerText = data.result;
-            resultDiv.style.opacity = "1";
-        } catch (e) {
-            resultDiv.innerText = "連線失敗，請確認網路狀態。";
-        } finally {
-            btn.disabled = false;
-            loader.style.display = "none";
-        }
+            const data = await res.json();
+            document.getElementById('resultArea').innerText = data.result;
+            loadStats(); // 翻譯完更新一次數據
+        } catch (e) { document.getElementById('resultArea').innerText = "連線逾時"; }
+    }
+
+    async function loadStats() {
+        try {
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getStats" }) });
+            const data = await res.json();
+            document.getElementById('vocabCnt').innerText = data.vocab;
+            document.getElementById('usageCnt').innerText = data.usage;
+            document.getElementById('statusDot').classList.add('online');
+            document.getElementById('statusTxt').innerText = "雲端詞庫已連線";
+        } catch (e) {}
     }
 
     async function submitFeedback() {
         const source = document.getElementById('inputText').value;
         const suggestion = document.getElementById('suggestText').value;
         if (!source || !suggestion) return alert("請填寫內容");
-
         try {
-            await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion })
-            });
-            alert("提交成功！管理員會盡快更新。");
+            await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion }) });
+            alert("已收到您的建議，謝謝！");
             document.getElementById('suggestText').value = "";
-        } catch (e) {
-            alert("提交失敗。");
-        }
+        } catch (e) { alert("提交異常"); }
     }
-</script>
 
+    window.onload = loadStats;
+</script>
 </body>
 </html>
