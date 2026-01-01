@@ -3,141 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>郵金翻譯 v3.0 專業測試版</title>
+    <title>郵金翻譯 v3.1 專業版</title>
     <style>
-        :root { --primary: #007d32; --bg: #f8f9fa; --accent: #1877F2; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); padding: 15px; display: flex; justify-content: center; }
+        :root { --primary: #007d32; --secondary: #005a24; --fb: #1877F2; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #f0f4f2; margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .status-bar { font-size: 12px; color: #666; text-align: center; margin-bottom: 15px; }
+        
+        /* 介面切換樣式 */
+        .ui-lang-selector { text-align: right; margin-bottom: 10px; }
+        .ui-lang-selector button { font-size: 11px; padding: 3px 8px; cursor: pointer; border: 1px solid #ddd; background: #fff; border-radius: 4px; }
+        .ui-active { background: var(--primary) !important; color: white; border-color: var(--primary); }
+
+        .status-bar { font-size: 11px; color: #888; text-align: center; margin-bottom: 15px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #ccc; margin-right: 5px; }
         .dot-online { background: #28a745; box-shadow: 0 0 5px #28a745; }
 
-        select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        label { font-weight: bold; font-size: 13px; color: #444; }
+        select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        textarea:focus { border-color: var(--primary); outline: none; }
         
-        .mic-box { position: relative; margin-bottom: 15px; }
-        .btn-mic { background: #dc3545; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.3s; }
-        .btn-mic.recording { background: #ffc107; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .mic-box { margin-bottom: 15px; }
+        .btn-mic { background: #dc3545; color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .recording { background: #ffc107; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.7; } }
 
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 4px 0 var(--secondary-color); }
-
-        #resultArea { background: #fff; border-left: 6px solid var(--primary); padding: 15px; margin-top: 20px; border-radius: 8px; font-size: 20px; min-height: 80px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; }
         
-        .action-links { display: flex; justify-content: space-between; margin-top: 15px; font-size: 14px; }
-        .action-links a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        #resultArea { background: #f9f9f9; border-left: 6px solid var(--primary); padding: 15px; margin-top: 15px; border-radius: 8px; font-size: 18px; min-height: 60px; word-wrap: break-word; }
+        
+        .feedback-section { margin-top: 25px; padding: 15px; background: #fdfdfd; border: 1px solid #eee; border-radius: 12px; }
+        .contact-footer { margin-top: 25px; text-align: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .fb-badge { display: inline-flex; align-items: center; gap: 6px; background: #e7f3ff; color: var(--fb); padding: 5px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="status-bar"><span id="statusDot" class="dot"></span> <span id="statusTxt">系統初始化中...</span></div>
+    <div class="ui-lang-selector">
+        <button onclick="switchUI('zh')" id="ui-zh" class="ui-active">中</button>
+        <button onclick="switchUI('en')" id="ui-en">EN</button>
+    </div>
+
+    <h2 id="ui-title" style="text-align: center; color: var(--primary); margin: 0 0 5px 0;">郵金翻譯專業版</h2>
+    <div class="status-bar"><span id="statusDot" class="dot"></span> <span id="statusTxt">詞庫檢查中...</span></div>
     
-    <label>請選擇說話者的語言：</label>
-    <select id="langSelect">
+    <label id="ui-label-src">1. 選擇說話語言：</label>
+    <select id="srcLang">
         <option value="zh-TW">中文 (繁體)</option>
         <option value="en-US">英文 (English)</option>
         <option value="ja-JP">日文 (日本語)</option>
         <option value="vi-VN">越南文 (Tiếng Việt)</option>
         <option value="id-ID">印尼文 (Bahasa Indonesia)</option>
-        <option value="th-TH">泰文 (ไทย)</option>
+    </select>
+
+    <label id="ui-label-tar">2. 選擇翻譯目標：</label>
+    <select id="tarLang">
+        <option value="zh-TW">翻譯成 中文</option>
+        <option value="en-US">Translate to English</option>
+        <option value="ja-JP">日本語に翻訳</option>
+        <option value="vi-VN">Dịch sang tiếng Việt</option>
+        <option value="id-ID">Terjemahkan ke Indonesia</option>
     </select>
 
     <div class="mic-box">
-        <button id="micBtn" class="btn-mic" onclick="toggleMic()">🎤 點擊開始錄音</button>
+        <button id="micBtn" class="btn-mic" onclick="toggleMic()">🎤 <span id="ui-mic">點擊錄音 (可修正文字)</span></button>
     </div>
 
-    <textarea id="inputText" placeholder="語音辨識內容..."></textarea>
+    <textarea id="inputText" placeholder="辨識結果會出現在這，您可以手動修改..."></textarea>
     
-    <button id="transBtn" class="btn-main" onclick="doTranslate()">翻譯成中文 (專業詞庫)</button>
+    <button id="transBtn" class="btn-main" onclick="doTranslate()" id="ui-btn-trans">開始專業翻譯</button>
 
-    <div id="resultArea">翻譯結果會在此顯示...</div>
-    <button onclick="speakResult()" style="margin-top:10px; background:none; border:1px solid #ccc; border-radius:5px; cursor:pointer; font-size:12px; padding:5px;">🔊 朗讀結果</button>
+    <div id="resultArea">...</div>
 
-    <div class="action-links">
-        <a href="#" onclick="alert('建議已記錄至試算表')">提交修正</a>
-        <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank">聯繫管理員</a>
+    <div class="feedback-section">
+        <label id="ui-label-fix">💡 提供修正建議：</label>
+        <input type="text" id="suggestText" style="width:100%; padding:8px; margin:5px 0; border-radius:5px; border:1px solid #ddd;" placeholder="正確譯文...">
+        <button onclick="submitFeedback()" style="font-size:12px; cursor:pointer;" id="ui-btn-fix">提交建議</button>
+    </div>
+
+    <div class="contact-footer">
+        <p style="font-size: 11px; color: #999; margin-bottom: 8px;">系統維護與專業支援</p>
+        <a href="https://www.facebook.com/share/17bAA8kb9q/" target="_blank" class="fb-badge">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V15.97c3.824-.603 6.75-3.933 6.75-7.922z"/></svg>
+            聯繫小優化專業室
+        </a>
     </div>
 </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyN_OLZr_Nk0GhJU56E890fGKjtCashTJlVbS8PMGgFijFZd4mdHdwlOVXT0rkqtK7E/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxAufILMrF9JqslmPK2WEQB31A7DUKA4LwPzSwKYw7oxzphQHS8-YOo2GgY6LtonMEE/exec";
     
-    // 初始化語音辨識
+    // 多國介面定義
+    const i18n = {
+        zh: { title: "郵金翻譯專業版", src: "1. 選擇說話語言：", tar: "2. 選擇翻譯目標：", mic: "點擊錄音 (可修正文字)", btn: "開始專業翻譯", fix: "提供修正建議：", fb: "聯繫小優化專業室" },
+        en: { title: "Post & Bank Translator", src: "1. Source Language:", tar: "2. Target Language:", mic: "Tap to Record (Editable)", btn: "Start Translation", fix: "Suggest Correction:", fb: "Contact Optimization Studio" }
+    };
+
+    function switchUI(lang) {
+        document.getElementById('ui-title').innerText = i18n[lang].title;
+        document.getElementById('ui-label-src').innerText = i18n[lang].src;
+        document.getElementById('ui-label-tar').innerText = i18n[lang].tar;
+        document.getElementById('ui-mic').innerText = i18n[lang].mic;
+        document.getElementById('transBtn').innerText = i18n[lang].btn;
+        document.getElementById('ui-label-fix').innerText = i18n[lang].fix;
+        document.getElementById('ui-zh').classList.toggle('ui-active', lang==='zh');
+        document.getElementById('ui-en').classList.toggle('ui-active', lang==='en');
+    }
+
+    // 語音辨識
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
-    let isRecording = false;
-
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-
         recognition.onresult = (e) => {
             document.getElementById('inputText').value = e.results[0][0].transcript;
             stopMicStyle();
-            doTranslate(); // 辨識完自動翻譯
         };
-
-        recognition.onerror = () => stopMicStyle();
         recognition.onend = () => stopMicStyle();
     }
 
     function toggleMic() {
-        if (!recognition) return alert("您的瀏覽器不支援語音辨識");
-        if (isRecording) {
-            recognition.stop();
-        } else {
-            recognition.lang = document.getElementById('langSelect').value;
-            recognition.start();
-            isRecording = true;
-            document.getElementById('micBtn').innerText = "🛑 正在聆聽...";
-            document.getElementById('micBtn').classList.add('recording');
-        }
+        if (!recognition) return alert("不支援此瀏覽器語音功能");
+        recognition.lang = document.getElementById('srcLang').value;
+        recognition.start();
+        document.getElementById('micBtn').classList.add('recording');
     }
 
-    function stopMicStyle() {
-        isRecording = false;
-        document.getElementById('micBtn').innerText = "🎤 點擊開始錄音";
-        document.getElementById('micBtn').classList.remove('recording');
-    }
+    function stopMicStyle() { document.getElementById('micBtn').classList.remove('recording'); }
 
     async function doTranslate() {
         const text = document.getElementById('inputText').value;
-        const resDiv = document.getElementById('resultArea');
+        const target = document.getElementById('tarLang').value;
         if (!text) return;
-
-        resDiv.innerText = "正在進行多國語詞庫比對...";
-        
+        document.getElementById('resultArea').innerText = "處理中...";
         try {
-            const response = await fetch(GAS_URL, {
+            const res = await fetch(GAS_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "translate", text: text, target: "zh-TW" })
+                body: JSON.stringify({ action: "translate", text: text, target: target })
             });
-            const data = await response.json();
-            resDiv.innerText = data.result;
-        } catch (e) {
-            resDiv.innerText = "翻譯發生錯誤。";
-        }
+            const data = await res.json();
+            document.getElementById('resultArea').innerText = data.result;
+        } catch (e) { document.getElementById('resultArea').innerText = "連線失敗"; }
     }
 
-    function speakResult() {
-        const text = document.getElementById('resultArea').innerText;
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'zh-TW';
-        window.speechSynthesis.speak(msg);
+    async function submitFeedback() {
+        const source = document.getElementById('inputText').value;
+        const suggestion = document.getElementById('suggestText').value;
+        if (!source || !suggestion) return alert("請填寫原句與建議");
+        try {
+            const res = await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "feedback", source: source, suggestion: suggestion })
+            });
+            const data = await res.json();
+            if(data.result === "Success") {
+                alert("提交成功！後台已記錄。");
+                document.getElementById('suggestText').value = "";
+            }
+        } catch (e) { alert("提交失敗，請檢查網路。"); }
     }
 
-    // 檢查連線
     window.onload = async () => {
         try {
             await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "translate", text: "ping" }) });
             document.getElementById('statusDot').classList.add('dot-online');
-            document.getElementById('statusTxt').innerText = "系統連線正常";
-        } catch (e) {
-            document.getElementById('statusTxt').innerText = "連線異常";
-        }
+            document.getElementById('statusTxt').innerText = "詞庫連線正常";
+        } catch (e) {}
     };
 </script>
-
 </body>
 </html>
